@@ -96,7 +96,7 @@ WHERE vh.login = dt.login AND vh.realm = dt.realm
 ORDER BY vh.login, vh.realm;
 
 
--- query 8, race   -- fix this 
+-- query 8, race   
 with 
 		helper1 (realm, gender, race, worth) AS (
 			SELECT act.realm,avt.gender, avt.race, sum(trs.sql)
