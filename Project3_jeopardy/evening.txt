@@ -1,0 +1,5 @@
+SELECT x.theme, x.day, x.realm, x.succeeded
+FROM quest x
+WHERE
+	succeeded > cast('20:00:00' as time) OR succeeded IS NULL
+ORDER BY  theme, day, realm;

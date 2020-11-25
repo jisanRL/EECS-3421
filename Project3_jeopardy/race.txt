@@ -1,0 +1,58 @@
+-- query 8, race   -- fix this 
+with 
+		helper1 (realm, gender, race, worth) AS (
+			SELECT act.realm,avt.gender, avt.race, sum(trs.sql)
+			FROM avatar avt, actor act, quest qst, visit vst, loot lt, treasure trs
+			WHERE
+				lt.treasure = trs.treasure
+				AND 
+                lt.theme = qst.theme
+				AND 
+                lt.realm = qst.realm
+				AND 
+                lt.day = qst.day
+				AND 
+                lt.login = act.login
+				AND 
+                lt.realm = act.realm
+				AND 
+                lt.day =   act.day
+				AND 
+                lt.theme = act.theme
+				AND 
+                act.theme = qst.theme
+				AND 
+                act.realm = qst.realm
+				AND 
+                act.day = qst.day
+				AND 
+                act.login = vst.login
+				AND 
+                act.realm = vst.realm
+				AND 
+                act.day = vst.day
+				AND 
+                qst.succeeded IS NOT NULL
+				AND 
+                vst.login = avt.login
+				AND 
+                vst.name = avt.name
+				AND 
+                act.login = avt.login
+			GROUP BY act.realm, avt.gender, avt.race
+		),
+		
+		helper2 (realm, gender, race, total) AS (
+			SELECT h1.realm, h1.gender, h1.race, max(h1.worth)
+			FROM avatar avt, helper1 h1
+			WHERE
+				avt.gender = h1.gender AND avt.race = h1.race
+			GROUP BY h1.realm, h1.race, h1.gender
+		)
+		
+SELECT h2.realm, h2.race, h2.gender, h2.total
+FROM helper1 h1, helper2 h2
+WHERE 
+	h1.realm = h2.realm AND h1.gender = h2.gender AND h1.race = h2.race AND h1.worth = h2.total
+ORDER BY h2.realm, h2.race, h2.gender;
+

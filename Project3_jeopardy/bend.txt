@@ -1,0 +1,14 @@
+with helper (login, total) as (
+    SELECT pl.login, count(av.name)
+    FROM player pl, avatar av
+    WHERE 
+      pl.login = av.login 
+    GROUP BY pl.login
+  )
+
+SELECT Pl.login, pl.name, pl.gender, hp.total AS avatar
+FROM player pl, avatar av, helper hp
+WHERE 
+	pl.login = av.login AND pl.login = hp.login AND pl.gender <> av.gender
+GROUP BY pl.login, pl.gender, pl.name, hp.total
+ORDER BY pl.login;

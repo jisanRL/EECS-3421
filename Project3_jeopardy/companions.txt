@@ -1,0 +1,74 @@
+with helper1 as (
+    SELECT DISTINCT vs.login, vs.name, ac.day, ac.realm, ac.theme
+    FROM actor ac, visit vs
+    WHERE 
+    ac.login = vs.login 
+    AND 
+    ac.realm = vs.realm 
+    AND 
+    ac.day = vs.day
+), 
+helper2 as (
+    SELECT DISTINCT h1.login as companion1, h1.name as fname, 
+    h1.realm as realm, h2.login as companion2, h2.name as lname
+    FROM helper1 h1, helper1 h2
+    WHERE 
+    h1.login < h2.login 
+    AND 
+    h1.name <> h2.name
+    AND
+    h1.realm = h1.realm
+    AND 
+    h1.theme = h2.theme
+    AND
+    h1.day = h2.day
+)
+
+SELECT * FROM helper2 
+WHERE NOT EXISTS (
+    (
+        SELECT helper1.day, helper1.realm, helper1.theme
+        FROM helper1
+        WHERE 
+        helper1.login = helper2.companion1 
+        AND 
+        helper1.name = helper2.fname
+        AND
+        helper1.realm = helper2.realm
+    )
+    EXCEPT
+    (
+        SELECT helper1.day, helper1.realm, helper1.theme
+        FROM helper1
+        WHERE 
+        helper1.login = helper2.companion2
+        AND
+        helper1.name = helper2.lname
+        AND  
+        helper1.realm = helper2.realm
+    )
+) 
+and NOT EXISTS (
+    (
+        SELECT helper1.day, helper1.realm, helper1.theme
+        FROM helper1
+        WHERE 
+        helper1.login = helper2.companion2
+        AND
+        helper1.name = helper2.lname
+        AND
+        helper1.realm = helper2.realm
+    )
+    EXCEPT 
+    (
+        SELECT helper1.day, helper1.realm, helper1.theme
+        FROM helper1
+        WHERE 
+        helper1.login = helper2.companion1
+        AND
+        helper1.name = helper2.fname
+        AND
+        helper1.realm = helper2.realm
+    )
+) 
+ORDER BY  realm, companion1, fname, companion2, lname;

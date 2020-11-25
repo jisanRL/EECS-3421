@@ -1,0 +1,13 @@
+WITH 
+     helper1 (login, name, day, quest) AS (
+          SELECT pl.login, pl.name, ac.day, COUNT(*) AS qt
+     	  FROM  actor ac, player Pl
+	  WHERE  pl.login = ac.login
+	  GROUP BY pl.login, pl.name, ac.day
+	  HAVING COUNT(*) > 1
+	  ORDER BY login, name, day
+     )
+
+SELECT h1.login, h1.name, ac.day, ac.realm, ac.theme
+FROM actor ac, helper1 h1 
+WHERE h1.login = ac.login AND h1.day = ac.day;

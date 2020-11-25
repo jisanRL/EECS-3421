@@ -1,0 +1,71 @@
+with
+helper1(login , name , race) AS
+(
+SELECT av.login , av.name , av.race
+FROM actor acr, avatar av 
+WHERE acr.login = av.login
+ORDER BY av.login , av.name , av.race
+),
+
+helperVisit(login , name , realm , day , theme) AS
+(
+SELECT vs.login , vs.name , vs.realm , vs.day ,acr.theme
+FROM visit vs, actor acr
+WHERE vs.login = acr.login AND vs.realm = acr.realm AND vs.day = acr.day
+ORDER BY vs.login , vs.name , vs.realm , vs.day , acr.theme
+),
+
+helperQuest(login , name , total) AS 
+(
+SELECT hv.login , hv.name , count(*) AS total 
+FROM helperVisit hv, quest qst 
+WHERE hv.theme = qst.theme AND hv.realm = qst.realm AND hv.day = qst.day AND qst.succeeded IS NOT NULL
+GROUP BY hv.login , hv.name
+),
+
+helpDecider(theme , realm , day , sql) AS
+(
+SELECT lt.theme , lt.realm , lt.day , trs.sql 
+FROM  loot lt, treasure trs, quest qst
+WHERE lt.treasure = trs.treasure AND qst.theme = lt.theme AND qst.realm = lt.realm AND qst.day = lt. day AND qst.succeeded IS NOT NULL
+ORDER BY lt.theme , lt.realm , lt.day , trs.sql 
+),
+
+helperMax(theme , realm , day , max) AS
+(
+SELECT hd.theme , hd.realm , hd.day , max(hd.sql)
+FROM helpDecider hd
+GROUP BY hd.theme , hd.realm , hd.day
+),
+
+playerHelper(login , name , maxsql) AS
+(
+SELECT hv.login , hv.name , sum(hm.max)
+FROM helperMax hm , helperVisit hv
+WHERE hv.realm = hm.realm AND hv.theme = hm.theme AND hv.day = hm.day
+GROUP BY hv.login , hv.name 
+),
+
+helperX(login , name) AS
+(
+SELECT login , name  
+FROM avatar avt
+except
+SELECT ph.login , ph.name
+FROM playerHelper ph
+),
+
+mergeHelper(login , name , race , sql , total) AS
+(
+SELECT ph.login , ph.name , h1.race , ph.maxsql , hq.total
+FROM playerHelper ph , helperQuest hq , helper1 h1
+WHERE ph.login = hq.login AND ph.name = hq.name AND h1.login = ph.login AND h1.name = ph.name AND h1.login = hq.login AND h1.name = hq.name
+UNION
+SELECT hx.login , hx.name , h1.race , 0 , 0
+FROM helperX hx , helper1 h1
+WHERE h1.login = hx.login AND h1.name = hx.name
+)
+
+SELECT mh.login AS login , mh.name AS name , mh.race AS race , mh.sql AS earned , mh.total AS quest
+FROM mergeHelper mh
+ORDER BY mh.login , mh.name , mh.race , mh.sql , mh.total;

@@ -1,0 +1,33 @@
+with 
+visithelper(login, realm, visits) AS 
+(
+    SELECT login, realm, COUNT(*)
+    FROM visit 
+    GROUP BY login, realm
+    HAVING COUNT(*) > 1 
+    ORDER BY login, realm
+), 
+dayfirst(login, realm, DAY) AS (
+    SELECT login, realm, MIN(DAY)
+    FROM visit 
+    GROUP BY login, realm
+    ORDER BY login, realm
+), 
+daylast(login, realm, DAY) AS (
+    SELECT login, realm, MAX(DAY)
+    FROM visit  
+    GROUP BY login, realm
+    ORDER BY login, realm
+), 
+daytotal(login, realm, days) AS (
+    SELECT df.login, df.realm, CAST((dl.day::DATE - df.day::DATE) AS DOUBLE PRECISION)
+    FROM dayfirst df, daylast dl    
+    WHERE df.login = dl.login AND df.realm = dl.realm
+    ORDER BY login, realm
+)
+
+SELECT vh.login, vh.realm, vh.visits, 
+CAST((dt.days/(vh.visits-1)) AS DECIMAL(5,2)) AS frequency
+FROM  visithelper vh,  daytotal dt
+WHERE vh.login = dt.login AND vh.realm = dt.realm
+ORDER BY vh.login, vh.realm;

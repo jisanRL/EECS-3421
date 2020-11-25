@@ -1,0 +1,3 @@
+SELECT * from player 
+WHERE lower(name) LIKE '%' || lower(login) || '%'             
+ORDER BY login asc;

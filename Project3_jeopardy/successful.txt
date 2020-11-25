@@ -1,0 +1,4 @@
+(SELECT DISTINCT theme FROM quest) 
+except 
+(SELECT DISTINCT theme FROM quest WHERE succeeded IS NULL)
+ORDER BY theme;
