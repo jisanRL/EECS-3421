@@ -37,8 +37,8 @@ public class CreateQuest {
 		// connection block
 		try {
             Class.forName("org.postgresql.Driver");
-//            connection = DriverManager.getConnection("jdbc:postgresql://db:5432/farhan95", "farhan95", "215145592");   // user and password change this and check for this  
-			connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/rrdb", "jisanreza", "root");   // user and password change this and check for this  
+//            connection = DriverManager.getConnection("jdbc:postgresql://db:5432/databasename", "user", "password");   // user and password change this and check for this  
+			connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/databasename", "user", "password");   // user and password change this and check for this  
 
             if (connection != null) {
                 System.out.println("Connection ok");
